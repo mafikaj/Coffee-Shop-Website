@@ -1,24 +1,34 @@
 # Use an official Python runtime as a parent image
-FROM python:3.8-slim
+FROM python:3.8.x
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Install system-level dependencies
+RUN apt-get update && \
+    apt-get install -y some-package
 
-# Set the working directory in the container
+# Create a non-root user
+RUN useradd -ms /bin/bash myuser
+
+# Set the working directory and ownership
 WORKDIR /app
+COPY . /app
 
-# Copy the requirements file into the container at /app
-COPY requirements.txt .
+# Exclude files mentioned in .gitignore
+COPY .dockerignore /app/.dockerignore
+RUN cat /app/.dockerignore | xargs rm -rf
 
-# Install any needed packages specified in requirements.txt
+RUN chown -R myuser:myuser /app
+
+# Switch to the non-root user
+USER myuser
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the current directory contents into the container at /app
-COPY . .
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
-# Define the command to run your application
+# Define environment variable
+ENV NAME World
+
+# Run the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

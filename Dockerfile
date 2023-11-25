@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.8.x
+FROM python:3.8
 
 # Install system-level dependencies
 RUN apt-get update && \
